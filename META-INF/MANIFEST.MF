@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: src/test/java/autotests/FirstTest.java
+Main-Class: autotests.FirstTest
+
