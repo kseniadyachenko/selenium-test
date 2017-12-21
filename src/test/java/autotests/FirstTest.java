@@ -13,7 +13,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 
@@ -97,20 +103,50 @@ public class FirstTest {
         System.out.println("searchInUrl " + url);
 
         List<WebElement> elements = driver.findElements(By.xpath("//*[contains(text(), '" + searchWord + "')]"));
-
         if (elements.size() > 0) {
-            addToReport(url, elements);
+            List<String> foundText = cutWordsFromSentence(elements, searchWord);
+            addToReport(url, foundText);
         }
     }
 
-    public void addToReport(String url, List<WebElement> elements) {
+    public List<String>  cutWordsFromSentence (List<WebElement> findSentences, String word){
+        String mainWord = searchWord;
+
+        List<String> sentences = findSentences
+                .stream()
+                .map(WebElement::getText)
+                .flatMap(Pattern.compile("[.\\?!\\n](?=[^\\S])")::splitAsStream)
+                .filter(sentence -> sentence.contains(searchWord))
+                .map(Pattern.compile("(?=[^\\S])")::split)
+                .map(words ->
+                        IntStream
+                            .range(0, words.length)
+                            .filter(i -> words[i].contains(searchWord))
+                            .boxed()
+                            .map(pos -> {
+                                int copyPosition = pos - 5;
+                                if (copyPosition < 0) {
+                                    copyPosition = 0;
+                                }
+                                return IntStream
+                                        .rangeClosed(copyPosition, (copyPosition + 5 < words.length ? copyPosition + 5 : (words.length - 1)))
+                                        .mapToObj(i -> words[i])
+                                        .collect(Collectors.toList())
+                                        .stream().collect(Collectors.joining());
+                            })
+                            .collect(Collectors.joining())
+                ).collect(Collectors.toList());
+
+        return sentences;
+    }
+
+    public void addToReport(String url, List<String> elements) {
         String text = "Url: " + url;
         addParagraph(text);
-        for (int i = 0; i < elements.size(); i++) {
-            text = elements.get(i).getText();
-            System.out.println("Sentence" + text);
-            if (text != null && text.length() > 0) {
-                addParagraph("Sentence: " + text);
+        for(String foundText : elements) {
+            System.out.println("Sentence" + foundText);
+            if (foundText != null && foundText.length() > 0) {
+                addParagraph("Sentence: " + foundText);
             }
         }
         takeScreenshot();
