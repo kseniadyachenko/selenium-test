@@ -8,14 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import static org.openqa.selenium.support.ui.ExpectedConditions.titleIs;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -139,7 +135,6 @@ public class FirstTest {
 
         int imgFormat1 = getImageFormat(imgFile1);
 
-        r.setText(imgFile1);
         r.addBreak();
         try {
             r.addPicture(new FileInputStream(img1), imgFormat1, imgFile1, Units.toEMU(width1), Units.toEMU(height1));
